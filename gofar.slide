@@ -1,0 +1,196 @@
+Go Far Together
+Tags: Go, Search, Instacart
+
+Jonathan Hsieh
+Catalog Items, Instacart
+jon.hsieh@instacart.com
+
+* Introduction
+
+1. Why Go?
+2. Go in the past
+3. Go at Instacart
+
+.image images/biplane.jpg
+
+* Why Go?
+
+* Several Reasons
+- Concurrency
+- Performance
+- Deployment
+
+* Concurrency
+Go supports concurrency in the language
+
+- Goroutines
+- Channels
+
+* Concurrency is not Parallelism
+.image images/concurrency_parallelism.png
+
+* Goroutines
+
+Goroutines are functions that run independently of the function that called it. 
+
+A Go program can run thousands of goroutines with minimal cost for context switching.
+
+* Context Switching is Expensive
+
+- Take out the garbage
+- Make dinner
+- Scrub the floors
+- Check mail
+- Chop the onions
+- Do taxes (due April 18th!)
+- Wash dishes
+
+Hard to switch tasks every split second!
+
+* Context switching for Goroutines and Threads
+
+Context switching for a goroutine only involves 3 registers:
+- PC (program counter)
+- SP (stack pointer)
+- DX (context)
+
+Context switching for a thread requires saving more registers
+- 16 GP (General Purpose)
+- PC (program counter)
+- SP (stack pointer)
+- Segment
+- 16 XMM
+- FP coprocessor state
+- 16 AVX
+- MSRs...
+
+* Stack Size for Goroutines and Threads
+
+Threads consume 1 MB
+Goroutines start at 2 KB
+
+Try spawning 10,000 threads
+
+* Goroutines and Threads
+
+Go runtime multiplexes goroutines on top of true OS threads.
+Blocked goroutines don't block a thread.
+
+* Goroutine Example
+
+.play code/example_goroutine/hello.go
+
+* Channels
+Channels are pipes that connect goroutines. Imagine a socket that's inside your program.
+
+Don't communicate by sharing memory - share memory by communicating. (Rob Pike)
+
+.play code/channel/channel.go
+
+* Goroutines and Channels
+
+.image images/goroutine_channels.png
+
+* When goroutines don't use a thread
+
+- Channel operations
+- Network operations (waiting on I/O)
+- Sleeping
+
+* Heartbeat
+
+.play code/heartbeat/heartbeat.go /START OMIT/,/END OMIT/
+
+* HTTP one at a time
+
+.play code/single_http/single_http.go /START OMIT/,/END OMIT/
+
+* Concurrent HTTP
+
+.play code/concurrent_http/conc_http.go /START OMIT/,/END OMIT/
+
+* Pop Quiz
+
+What are the 3 constraints for system performance?
+
+.image images/16.png
+
+* Consider using Go when CPU bound
+- Memory
+- CPU 
+- I/O
+
+* Deployment
+
+Compiles to one binary
+rsync, cp, scp
+
+* Controversy
+
+"I don't know man. I wrote Haskell for a long time. Go is a boring language."
+
+* Go in the past
+
+* Processing Twitter Firehose
+Jon why are you spending $1000/month on firehose infra??
+.image images/firehose_minion.png
+
+* How many VMs did I need after switching to Go?
+
+* One
+.image images/firehose_collapse.png
+
+* Open challenge in Ruby
+
+100 MB/s HTTP stream
+Low tolerance for falling behind
+JSON parse payload, transform, reformat, transmit out
+One process
+
+* Go at Instacart
+
+* Search requirements
+
+1. Manage states of different ES clusters
+2. Proxy reads to available clusters
+3. Disable reads to a cluster until writes are done
+4. Add or remove clusters without restarting
+5. Modify cluster write/read state without restarting
+5. Keep up with Instacart traffic
+6. Make coffee
+7. Rewrite packets on the fly
+8. Receive a real-time stream of error messages
+9. Scalable on multiple cores
+10. Easy to deploy
+11. Restful API
+
+* Managing Cluster Read/Write Status
+
+.image images/mod_map.png
+
+* Map Code
+
+.code code/reverse_proxy/reverse_proxy.go /START CODEMAP/,/END CODEMAP/
+Might use locks instead of channels for production
+
+* Reads
+
+.image images/es_go_reader.png
+
+* Read example
+.play code/multi_read/multi_read.go /START OMIT/,/END OMIT/
+
+* Writes
+
+.image images/es_go_writer.png
+
+* Multi-write example
+.play code/multi_write/multi_write.go /START OMIT/,/END OMIT/
+
+* Combine all into one process!
+
+* Groundbreaking paper from the 1970s
+
+Communicating Sequential Processes
+.link http://www.cs.cmu.edu/~crary/819-f09/Hoare78.pdf
+
